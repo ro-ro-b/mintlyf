@@ -1,0 +1,331 @@
+---
+openapi: 3.0.0
+info:
+  title: BLOCKv Publisher API
+  description: >
+    This API collection describes the endpoint provided by the BLOCKv
+    platform for a vAtom developer or publisher. You need to load a
+    BLOCKv-Environment in Postman to connect to the BLOCKv Server. The
+    environment contains the API-Server URI and an App-ID (which has to be set
+    in the Header for every Request) as a variable. All API calls require
+    authentication. Once logged in successfully a session cookie is set and has
+    to be added to every request for authentication.
+  version: 1.0.0
+servers:
+  - url: https://{{BLOCKv-API}}
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    AppId:
+      name: X-BLOCKv-App-Id
+      in: header
+      required: true
+      schema:
+        type: string
+paths:
+  /api/v1/user/login:
+    post:
+      summary: User Login
+      description: Login using the email address or phone number assigned with your
+        publisher admin account.
+      operationId: loginUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: admin@vatom_publisher.com
+                password:
+                  type: string
+                  example: mysecret
+      responses:
+        "200":
+          description: Successful login
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /api/v1/general/ping:
+    get:
+      summary: Ping
+      description: Simple response to test if the user has been logged in correctly.
+      operationId: ping
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+      responses:
+        "200":
+          description: Successful ping
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /api/v1/currentuser/vatom/template:
+    post:
+      summary: Create vAtom Template
+      description: Creates a new vAtom Template.
+      operationId: createvAtomTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                  example: publisher_domain::Template_Name
+                public:
+                  type: boolean
+                  example: false
+                cloneable:
+                  type: boolean
+                  example: false
+                vatom:
+                  type: object
+                  properties:
+                    vAtomic::v1::vAtom::vAtomType:
+                      type: object
+                      properties:
+                        root_type:
+                          type: string
+                          example: vAtomic::v1::vAtom::vAtomType
+                        transferable:
+                          type: boolean
+                          example: true
+                        acquireable:
+                          type: boolean
+                          example: false
+                        title:
+                          type: string
+                          example: vAtom title
+                        description:
+                          type: string
+                          example: vAtom description
+                        category:
+                          type: string
+                          example: vAtom category
+                        commerce:
+                          type: object
+                          properties:
+                            redeemable:
+                              type: boolean
+                              example: false
+                            pricing:
+                              type: object
+                              properties:
+                                v1::PricingType:
+                                  type: string
+                                  example: Fixed
+                                value:
+                                  type: object
+                                  properties:
+                                    currency:
+                                      type: string
+                                    price:
+                                      type: string
+                                    valid_from:
+                                      type: string
+                                    valid_through:
+                                      type: string
+                                    vat_included:
+                                      type: boolean
+                                      example: false
+                        states:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Activated
+                              value:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    example: boolean
+                                  value:
+                                    type: string
+                                    example: true
+                        resources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: ActivatedImage
+                              v1::ResourceType:
+                                type: string
+                              value:
+                                type: object
+                                properties:
+                                  v1::ResourceValueType:
+                                    type: string
+                                    example: ResourceValueType::URI
+                                  value:
+                                    type: string
+                        visibility:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: owner
+                            value:
+                              type: string
+                              example: "*"
+                    private:
+                      type: object
+                      properties:
+                        my_own_property:
+                          type: string
+                          example: ""
+      responses:
+        "200":
+          description: Successful creation of the template
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+  /api/v1/currentuser/vatom/template/variation:
+    post:
+      summary: Create vAtom Template Variation
+      description: Creates a new variation for the specified template.
+      operationId: createvAtomTemplateVariation
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                  example: publisher_domain::Template_Name
+                template_variation:
+                  type: string
+                  example: publisher_domain::Template_Name::Template-Variation_Name
+                public:
+                  type: boolean
+                  example: false
+                cloneable:
+                  type: boolean
+                  example: false
+                redeemable:
+                  type: object
+                auto_create_on_acquire:
+                  type: boolean
+                  example: false
+                vatom:
+                  type: object
+                  properties:
+                    vAtomic::v1::vAtom::vAtomType:
+                      type: object
+                      properties:
+                        transferable:
+                          type: boolean
+                          example: true
+                        acquireable:
+                          type: boolean
+                          example: false
+                        title:
+                          type: string
+                          example: Example
+                        category:
+                          type: string
+                          example: Utilities
+                        description:
+                          type: string
+                          example: This is just a demo
+                        commerce:
+                          type: object
+                          properties:
+                            redeemable:
+                              type: boolean
+                              example: false
+                            pricing:
+                              type: object
+                              properties:
+                                v1::PricingType:
+                                  type: string
+                                  example: Fixed
+                                value:
+                                  type: object
+                                  properties:
+                                    currency:
+                                      type: string
+                                    price:
+                                      type: string
+                                    valid_from:
+                                      type: string
+                                      example: "*"
+                                    valid_through:
+                                      type: string
+                                      example: "*"
+                                    vat_included:
+                                      type: boolean
+                                      example: false
+                        resources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: ActivatedImage
+                              v1::ResourceType:
+                                type: string
+                                example: ResourceTypes::Image::PNG
+                              value:
+                                type: object
+                                properties:
+                                  v1::ResourceValueType:
+                                    type: string
+                                    example: ResourceValueType::URI
+                                  value:
+                                    type: string
+                                    example: https://cdn.blockv.net/blockv.example/Folder/example.png
+                        visibility:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: owner
+                            value:
+                              type: string
+                              example: "*"
+                    private:
+                      type: object
+                      properties:
+                        my_own_property:
+                          type: string
+                          example: This is just a text
+      responses:
+        "200":
+          description: Successful creation of the template variation
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
