@@ -1,195 +1,1509 @@
-{
-  "openapi": "3.0.1",
-  "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
-  },
-  "servers": [
-    {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    }
-  }
-}
+openapi: 3.0.0
+info:
+  title: BLOCKv Publisher API
+  description: This API collection describes the endpoint provided by the BLOCKv platform for a vAtom developer or publisher.
+  version: 1.0.0
+servers:
+  - url: https://{{BLOCKv-API}}
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    AppId:
+      name: X-BLOCKv-App-Id
+      in: header
+      required: true
+      schema:
+        type: string
+paths:
+  /api/v1/user/login:
+    post:
+      summary: User Login
+      description: Login using the email address or phone number assigned with your publisher admin account.
+      operationId: loginUser
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: admin@vatom_publisher.com
+                password:
+                  type: string
+                  example: mysecret
+      responses:
+        '200':
+          description: Successful login
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/general/ping:
+    get:
+      summary: Ping
+      description: Simple response to test if the user has been logged in correctly.
+      operationId: ping
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful ping
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/vatom/template:
+    post:
+      summary: Create vAtom Template
+      description: Creates a new vAtom Template.
+      operationId: createvAtomTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                  example: publisher_domain::Template_Name
+                public:
+                  type: boolean
+                  example: false
+                cloneable:
+                  type: boolean
+                  example: false
+                vatom:
+                  type: object
+                  properties:
+                    vAtomic::v1::vAtom::vAtomType:
+                      type: object
+                      properties:
+                        root_type:
+                          type: string
+                          example: vAtomic::v1::vAtom::vAtomType
+                        transferable:
+                          type: boolean
+                          example: true
+                        acquireable:
+                          type: boolean
+                          example: false
+                        title:
+                          type: string
+                          example: vAtom title
+                        description:
+                          type: string
+                          example: vAtom description
+                        category:
+                          type: string
+                          example: vAtom category
+                        commerce:
+                          type: object
+                          properties:
+                            redeemable:
+                              type: boolean
+                              example: false
+                            pricing:
+                              type: object
+                              properties:
+                                v1::PricingType:
+                                  type: string
+                                  example: Fixed
+                                value:
+                                  type: object
+                                  properties:
+                                    currency:
+                                      type: string
+                                    price:
+                                      type: string
+                                    valid_from:
+                                      type: string
+                                    valid_through:
+                                      type: string
+                                    vat_included:
+                                      type: boolean
+                                      example: false
+                        states:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Activated
+                              value:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    example: boolean
+                                  value:
+                                    type: string
+                                    example: true
+                        resources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: ActivatedImage
+                              v1::ResourceType:
+                                type: string
+                              value:
+                                type: object
+                                properties:
+                                  v1::ResourceValueType:
+                                    type: string
+                                    example: ResourceValueType::URI
+                                  value:
+                                    type: string
+                        visibility:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: owner
+                            value:
+                              type: string
+                              example: *
+                    private:
+                      type: object
+                      properties:
+                        my_own_property:
+                          type: string
+                          example: ""
+      responses:
+        '200':
+          description: Successful creation of the template
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/vatom/template/variation:
+    post:
+      summary: Create vAtom Template Variation
+      description: Creates a new variation for the specified template.
+      operationId: createvAtomTemplateVariation
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                  example: publisher_domain::Template_Name
+                template_variation:
+                  type: string
+                  example: publisher_domain::Template_Name::Template-Variation_Name
+                public:
+                  type: boolean
+                  example: false
+                cloneable:
+                  type: boolean
+                  example: false
+                redeemable:
+                  type: object
+                auto_create_on_acquire:
+                  type: boolean
+                  example: false
+                vatom:
+                  type: object
+                  properties:
+                    vAtomic::v1::vAtom::vAtomType:
+                      type: object
+                      properties:
+                        transferable:
+                          type: boolean
+                          example: true
+                        acquireable:
+                          type: boolean
+                          example: false
+                        title:
+                          type: string
+                          example: Example
+                        category:
+                          type: string
+                          example: Utilities
+                        description:
+                          type: string
+                          example: This is just a demo
+                        commerce:
+                          type: object
+                          properties:
+                            redeemable:
+                              type: boolean
+                              example: false
+                            pricing:
+                              type: object
+                              properties:
+                                v1::PricingType:
+                                  type: string
+                                  example: Fixed
+                                value:
+                                  type: object
+                                  properties:
+                                    currency:
+                                      type: string
+                                    price:
+                                      type: string
+                                    valid_from:
+                                      type: string
+                                      example: *
+                                    valid_through:
+                                      type: string
+                                      example: *
+                                    vat_included:
+                                      type: boolean
+                                      example: false
+                        resources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: ActivatedImage
+                              v1::ResourceType:
+                                type: string
+                                example: ResourceTypes::Image::PNG
+                              value:
+                                type: object
+                                properties:
+                                  v1::ResourceValueType:
+                                    type: string
+                                    example: ResourceValueType::URI
+                                  value:
+                                    type: string
+                                    example: https://cdn.blockv.net/blockv.example/Folder/example.png
+                        visibility:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: owner
+                            value:
+                              type: string
+                              example: *
+                    private:
+                      type: object
+                      properties:
+                        my_own_property:
+                          type: string
+                          example: This is just a text
+      responses:
+        '200':
+          description: Successful creation of the template variation
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/vatom:
+    post:
+      summary: Create vAtom
+      description: Emits a new vAtom based on the specified template variation.
+      operationId: createvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_variation:
+                  type: string
+                  example: publisher_name::v1::Example
+                num:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Successful emission of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Transfer:
+    post:
+      summary: Transfer vAtom
+      description: Performs the transfer action on the specified vAtom.
+      operationId: transfervAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+                new.owner.email:
+                  type: string
+                  example: you@publisher.com
+      responses:
+        '200':
+          description: Successful transfer of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/face:
+    post:
+      summary: Register Face
+      description: Registers a native image face for the specified
+  template.
+      operationId: registerFace
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template:
+                  type: string
+                  example: publisher_name::v1::Template-Name
+                display_url:
+                  type: string
+                  example: native://image
+                package_url:
+                  type: string
+                  example: native://image
+                constraints:
+                  type: object
+                  properties:
+                    bluetooth_le:
+                      type: boolean
+                      example: false
+                    contact_list:
+                      type: boolean
+                      example: false
+                    gps:
+                      type: boolean
+                      example: false
+                    view_mode:
+                      type: string
+                      example: icon
+                    platform:
+                      type: string
+                      example: ios
+                    three_d:
+                      type: boolean
+                      example: false
+                    quality:
+                      type: string
+                      example: high
+                resources:
+                  type: array
+                  items:
+                    type: string
+                    example: ActivatedImage
+      responses:
+        '200':
+          description: Successful registration of the face
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/face/{Face-Id}:
+    delete:
+      summary: Delete Face
+      description: Deletes the face based on its ID.
+      operationId: deleteFace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Face-Id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful deletion of the face
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/face:
+    patch:
+      summary: Update Face
+      description: Updates the face configuration.
+      operationId: updateFace
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                properties:
+                  type: object
+                  properties:
+                    display_url:
+                      type: string
+                    package_url:
+                      type: string
+                    constraints:
+                      type: object
+                    resources:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        '200':
+          description: Successful update of the face
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /spec/faces/{Template-Name}:
+    get:
+      summary: List Faces
+      description: Lists the faces registered for the specified template.
+      operationId: listFaces
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Template-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: publisher_name::v1::Template-Name
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful retrieval of faces
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        template:
+                          type: string
+                        display_url:
+                          type: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action:
+    post:
+      summary: Register Action
+      description: Registers an action for the specified template.
+      operationId: registerAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: publisher_name::v1::Template_Name::Action::Transfer
+                reactor:
+                  type: string
+                  example: vatomic://v1/Transfer
+                wait:
+                  type: boolean
+                  example: true
+                rollback:
+                  type: boolean
+                  example: false
+                abort_on_pre_error:
+                  type: boolean
+                  example: true
+                abort_on_post_error:
+                  type: boolean
+                  example: false
+                abort_on_main_error:
+                  type: boolean
+                  example: true
+                timeout:
+                  type: integer
+                  example: 10000
+                guest_user:
+                  type: boolean
+                  example: true
+                state_impact:
+                  type: array
+                  items:
+                    type: string
+                    example: this.owner
+                policy:
+                  type: object
+                  properties:
+                    pre:
+                      type: array
+                      items:
+                        type: object
+                    rule:
+                      type: string
+                    post:
+                      type: array
+                      items:
+                        type: object
+                params:
+                  type: object
+                  properties:
+                    input:
+                      type: array
+                      items:
+                        type: string
+                        example: this.id
+                    output:
+                      type: array
+                      items:
+                        type: string
+                        example: vAtomic::v1::Error
+                config:
+                  type: object
+                  properties:
+                    auto_create_landing_page:
+                      type: string
+                      example: http://viewer.vatomic.io/#
+                    auto_create_mode:
+                      type: string
+                      example: claim
+                    auto_create_non_existing_recipient:
+                      type: boolean
+                      example: true
+                limit_per_user:
+                  type: integer
+                  example: 0
+                action_notification:
+                  type: object
+                  properties:
+                    on:
+                      type: boolean
+                      example: true
+                    msg:
+                      type: string
+                      example: You received a vAtom
+                    custom:
+                      type: object
+      responses:
+        '200':
+          description: Successful registration of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action/{id}:
+    patch:
+      summary: Update Action
+      description: Updates the action configuration.
+      operationId: updateAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                properties:
+                  type: object
+                  properties:
+                    policy:
+                      type: object
+                    params:
+                      type: object
+                      properties:
+                        input:
+                          type: array
+                          items:
+                            type: string
+                        output:
+                          type: array
+                          items:
+                            type: string
+      responses:
+        '200':
+          description: Successful update of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action/{id}:
+    delete:
+      summary: Delete Action
+      description: Deletes the action based on its ID.
+      operationId: deleteAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful deletion of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/actions/{vAtom-Template-Name}:
+    get:
+      summary: List Actions
+      description: Lists all actions registered with the template.
+      operationId: listActions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: vAtom-Template-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: publisher_name::v1::Template_Name
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful retrieval of actions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        reactor:
+                          type: string
+                        wait:
+                          type: boolean
+                        rollback:
+                          type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /spec/action/{Template-Name}::{Action-Name}:
+    get:
+      summary: Get Action by Name
+      description: Retrieves the action definition based on the action name.
+      operationId: getActionByName
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Template-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: publisher_name::v1::Template_Name
+        - name: Action-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: Action::Transfer
+        -
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful retrieval of the action
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      reactor:
+                        type: string
+                      wait:
+                        type: boolean
+                      rollback:
+                        type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/vatom:
+    post:
+      summary: Emit vAtom
+      description: Emits a new vAtom based on the specified template variation.
+      operationId: emitvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_variation:
+                  type: string
+                  example: publisher_name::v1::Example
+                num:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Successful emission of the vAtom
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      vatom_id:
+                        type: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Transfer:
+    post:
+      summary: Transfer vAtom
+      description: Performs the transfer action on the specified vAtom.
+      operationId: transfervAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+                new.owner.email:
+                  type: string
+                  example: you@publisher.com
+      responses:
+        '200':
+          description: Successful transfer of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action:
+    post:
+      summary: Register Action
+      description: Registers an action for the specified template.
+      operationId: registerAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: publisher_name::v1::Template_Name::Action::Transfer
+                reactor:
+                  type: string
+                  example: vatomic://v1/Transfer
+                wait:
+                  type: boolean
+                  example: true
+                rollback:
+                  type: boolean
+                  example: false
+                abort_on_pre_error:
+                  type: boolean
+                  example: true
+                abort_on_post_error:
+                  type: boolean
+                  example: false
+                abort_on_main_error:
+                  type: boolean
+                  example: true
+                timeout:
+                  type: integer
+                  example: 10000
+                guest_user:
+                  type: boolean
+                  example: true
+                state_impact:
+                  type: array
+                  items:
+                    type: string
+                    example: this.owner
+                policy:
+                  type: object
+                  properties:
+                    pre:
+                      type: array
+                      items:
+                        type: object
+                    rule:
+                      type: string
+                    post:
+                      type: array
+                      items:
+                        type: object
+                params:
+                  type: object
+                  properties:
+                    input:
+                      type: array
+                      items:
+                        type: string
+                        example: this.id
+                    output:
+                      type: array
+                      items:
+                        type: string
+                        example: vAtomic::v1::Error
+                config:
+                  type: object
+                  properties:
+                    auto_create_landing_page:
+                      type: string
+                      example: http://viewer.vatomic.io/#
+                    auto_create_mode:
+                      type: string
+                      example: claim
+                    auto_create_non_existing_recipient:
+                      type: boolean
+                      example: true
+                limit_per_user:
+                  type: integer
+                  example: 0
+                action_notification:
+                  type: object
+                  properties:
+                    on:
+                      type: boolean
+                      example: true
+                    msg:
+                      type: string
+                      example: You received a vAtom
+                    custom:
+                      type: object
+      responses:
+        '200':
+          description: Successful registration of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action/{id}:
+    patch:
+      summary: Update Action
+      description: Updates the action configuration.
+      operationId: updateAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                properties:
+                  type: object
+                  properties:
+                    policy:
+                      type: object
+                    params:
+                      type: object
+                      properties:
+                        input:
+                          type: array
+                          items:
+                            type: string
+                        output:
+                          type: array
+                          items:
+                            type: string
+      responses:
+        '200':
+          description: Successful update of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/publisher/action/{id}:
+    delete:
+      summary: Delete Action
+      description: Deletes the action based on its ID.
+      operationId: deleteAction
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful deletion of the action
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/actions/{vAtom-Template-Name}:
+    get:
+      summary: List Actions
+      description: Lists all actions registered with the template.
+      operationId: listActions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: vAtom-Template-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: publisher_name::v1::Template_Name
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful retrieval of actions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        reactor:
+                          type: string
+                        wait:
+                          type: boolean
+                        rollback:
+                          type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /spec/action/{Template-Name}::{Action-Name}:
+    get:
+      summary: Get Action by Name
+      description: Retrieves the action definition based on the action name.
+      operationId: getActionByName
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Template-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: publisher_name::v1::Template_Name
+        - name: Action-Name
+          in: path
+          required: true
+          schema:
+            type: string
+            example: Action::Transfer
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: Successful retrieval of the action
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      reactor:
+                        type: string
+                      wait:
+                        type: boolean
+                      rollback:
+                        type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/vatom:
+    post:
+      summary: Emit vAtom
+      description: Emits a new vAtom based on the specified template variation.
+      operationId: emitvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_variation:
+                  type: string
+                  example: publisher_name::v1::Example
+                num:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Successful emission of the vAtom
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                                 example: true
+                  data:
+                    type: object
+                    properties:
+                      vatom_id:
+                        type: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Transfer:
+    post:
+      summary: Transfer vAtom
+      description: Performs the transfer action on the specified vAtom.
+      operationId: transfervAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+                new.owner.email:
+                  type: string
+                  example: you@publisher.com
+      responses:
+        '200':
+          description: Successful transfer of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Trade:
+    post:
+      summary: Trade vAtom
+      description: Performs the trade action on the specified vAtom.
+      operationId: tradevAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+                trade.template_variation:
+                  type: string
+                trade.conditions:
+                  type: string
+      responses:
+        '200':
+          description: Successful trade of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Acquire:
+    post:
+      summary: Acquire vAtom
+      description: Performs the acquire action on the specified vAtom.
+      operationId: acquirevAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful acquire of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/AcquirePubVariation:
+    post:
+      summary: Acquire Public Variation
+      description: Performs the acquire public variation action on the specified vAtom.
+      operationId: acquirePubVariation
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful acquire public variation of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Activate:
+    post:
+      summary: Activate vAtom
+      description: Performs the activate action on the specified vAtom.
+      operationId: activatevAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful activation of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Discover:
+    post:
+      summary: Discover vAtom
+      description: Performs the discover action on the specified vAtom.
+      operationId: discovervAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful discover of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Drop:
+    post:
+      summary: Drop vAtom
+      description: Performs the drop action on the specified vAtom.
+      operationId: dropvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+                geo.pos:
+                  type: string
+      responses:
+        '200':
+          description: Successful drop of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Pickup:
+    post:
+      summary: Pickup vAtom
+      description: Performs the pickup action on the specified vAtom.
+      operationId: pickupvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful pickup of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Clone:
+    post:
+      summary: Clone vAtom
+      description: Performs the clone action on the specified vAtom.
+      operationId: clonevAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful clone of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/CloningHistory:
+    post:
+      summary: Get Cloning History
+      description: Retrieves the cloning history of the specified vAtom.
+      operationId: cloningHistoryvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful retrieval of cloning history
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+
+  /api/v1/currentuser/action/Redeem:
+    post:
+      summary: Redeem vAtom
+      description: Performs the redeem action on the specified vAtom.
+      operationId: redeemvAtom
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                this.id:
+                  type: string
+                  example: vAtom-Id
+      responses:
+        '200':
+          description: Successful redeem of the vAtom
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+      
